@@ -1,9 +1,22 @@
 #include <iostream>
 #include "rectangle.h"
 
+#include <GLUT/glut.h>
+
 using namespace std;
 
-int main () {
+void display(){
+}
+
+int main(int argc, char** argv){
+  glutInit(&argc,argv);
+  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
+  glutInitWindowSize(1000,600);
+  glutInitWindowPosition(100,100);
+  glutCreateWindow("Rectangles App");
+  glutDisplayFunc(display);
+  glutMainLoop();
+
   cout << "We're going to make a rectangle\n";
   Rectangle rect;
 
