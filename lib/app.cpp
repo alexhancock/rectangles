@@ -19,8 +19,10 @@ void display(){
     return;
   }
 
-  Vector3f Vertices[1];
-  Vertices[0] = Vector3f(0.0f, 0.0f, 0.0f);
+  Vector3f Vertices[3];
+  Vertices[0] = Vector3f(-1.0f, -1.0f, 0.0f);
+  Vertices[1] = Vector3f(1.0f, -1.0f, 0.0f);
+  Vertices[2] = Vector3f(0.0f, 1.0f, 0.0f);
   
   GLuint VBO;
   glGenBuffers(1, &VBO);
@@ -29,8 +31,10 @@ void display(){
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
 
-  // Enable the vertex attr, so that it's data is available to the rendering pipeline
+  // Enable the vertex attrs, so that the data is available to the rendering pipeline
   glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glEnableVertexAttribArray(2);
   
   // Bind our data to the buffer, so we can draw it
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -48,11 +52,13 @@ void display(){
   // Draw! - This is a simple ordered draw call, with no index buffer
   // 1st arg - specifies the topology as points so every vertex is one points
   // 2nd - where to start pulling data 
-  // 3rd - how many to draw (just our one point for now)
-  glDrawArrays(GL_POINTS, 0, 1);
+  // 3rd - how many of the attrs to draw - three, for the triangle
+  glDrawArrays(GL_TRIANGLES, 0, 3);
 
-  // Disable the vertex attr
+  // Disable the vertex attrs
   glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
+  glDisableVertexAttribArray(2);
   
   // Switch the offscreen buffer we've been drawing into to the front, so it displays on the window
   glutSwapBuffers();
