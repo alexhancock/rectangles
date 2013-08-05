@@ -1,97 +1,79 @@
 #include <iostream>
-#include "rectangle.h"
+#include <fstream>
+#include <string.h>
 
-#include <GL/glew.h>
+#include "util/util.hpp"
+#include "util/shaders.hpp"
+
 #include <GLUT/glut.h>
-
 #include "math_3d.h"
+
+GLuint VBO;
 
 using namespace std;
 
-void display(){
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  // Spin up glew
-  GLenum res = glewInit();
-  if (res != GLEW_OK)
-  {
-    fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
-    return;
-  }
-
-  Vector3f Vertices[3];
-  Vertices[0] = Vector3f(-1.0f, -1.0f, 0.0f);
-  Vertices[1] = Vector3f(1.0f, -1.0f, 0.0f);
-  Vertices[2] = Vector3f(0.0f, 1.0f, 0.0f);
-  
-  GLuint VBO;
-  glGenBuffers(1, &VBO);
-
-  // Set up the buffer to hold an array of vertices
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
-
-  // Enable the vertex attrs, so that the data is available to the rendering pipeline
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-  glEnableVertexAttribArray(2);
-  
-  // Bind our data to the buffer, so we can draw it
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-  // Tell the buffer how to interpret data
- 
-  // 1st arg - position of attr in Vertices
-  // 2nd - Number of components in the attribute - three for x, y, z
-  // 3rd - data type of components
-  // 4th - whether or not to normalize data before used in the pipeline
-  // 5th - The "stride" or number of bytes between two instances of the attr in the buffer
-  // 6th - not useful here, but you can use it to supply a bit offset for position/normals
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-  // Draw! - This is a simple ordered draw call, with no index buffer
-  // 1st arg - specifies the topology as points so every vertex is one points
-  // 2nd - where to start pulling data 
-  // 3rd - how many of the attrs to draw - three, for the triangle
-  glDrawArrays(GL_TRIANGLES, 0, 3);
-
-  // Disable the vertex attrs
-  glDisableVertexAttribArray(0);
-  glDisableVertexAttribArray(1);
-  glDisableVertexAttribArray(2);
-  
-  // Switch the offscreen buffer we've been drawing into to the front, so it displays on the window
-  glutSwapBuffers();
+static void SetupShaders()
+{
+  Shaders shaderUtil;
+  GLuint shaderProgram = shaderUtil.compile("lib/shaders/rect.vert", "lib/shaders/rect.frag");
+  glUseProgram(shaderProgram);
 }
 
-int main(int argc, char** argv){
-  glutInit(&argc,argv);
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-  glutInitWindowSize(900, 500);
-  glutInitWindowPosition(100, 50);
-  glutCreateWindow("Rectangles App");
+static void RenderScene()
+{
+    SetupShaders();
 
-  glutDisplayFunc(display);
-  glutMainLoop();
+    glClear(GL_COLOR_BUFFER_BIT);
 
-  cout << "We're going to make a rectangle\n";
-  Rectangle rect;
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-  long w;
-  cout << "Please enter a width: ";
-  cin >> w;
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glDisableVertexAttribArray(0);
+    glutSwapBuffers();
+}
 
-  long h;
-  cout << "Please enter a height: ";
-  cin >> h;
+static void InitializeGlutCallbacks()
+{
+    glutDisplayFunc(RenderScene);
+}
 
-  cout << "The rectangle's dimensions are: " << h << " x " << w << "\n";
-  rect.set_vals (w, h);
+static void CreateVertexBuffer()
+{
+    Vector3f Vertices[] = {
+      Vector3f(-1.0f, -1.0f, 0.0f),
+      Vector3f(1.0f, -1.0f, 0.0f),
+      Vector3f(1.0f, 1.0f, 0.0f),
+      Vector3f(-1.0f, 1.0f, 0.0f)
+    };
 
-  cout << "The rectangle's area is: " << rect.area() << "\n";
-  cout << "\n";
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+}
 
-  rect.draw_ascii(w, h);
+int main(int argc, char** argv)
+{
+    // TODO - Abstract drawing logic into a class
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
+    glutInitWindowSize(1024, 768);
+    glutInitWindowPosition(100, 100);
+    glutCreateWindow("Rectangles");
 
-  return 0;
+    InitializeGlutCallbacks();
+
+    GLenum res = glewInit();
+    if (res != GLEW_OK) {
+      fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
+      return 1;
+    }
+
+    glClearColor(0.1f, 0.8f, 0.6f, 0.0f);
+
+    CreateVertexBuffer();
+    glutMainLoop();
+
+    return 0;
 }
