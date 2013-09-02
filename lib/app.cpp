@@ -13,6 +13,7 @@
 GLuint VBO;
 GLuint shaderProgram;
 GLuint gScaleLocation;
+GLuint gWorldLocation;
 
 using namespace std;
 
@@ -30,6 +31,16 @@ static void RenderScene()
     static float Scale = 0.0f;
     Scale += 0.004f;
     glUniform1f(gScaleLocation, sinf(Scale));
+
+    // Create a 4x4 matrix to perform a translation transformation
+    Matrix4f World;
+    World.m[0][0] = 1.0f; World.m[0][1] = 0.0f; World.m[0][2] = 0.0f; World.m[0][3] = sinf(Scale);
+    World.m[1][0] = 0.0f; World.m[1][1] = 1.0f; World.m[1][2] = sinf(Scale); World.m[1][3] = sinf(Scale);
+    World.m[2][0] = 0.0f; World.m[2][1] = 0.0f; World.m[2][2] = 1.0f; World.m[2][3] = 0.0f;
+    World.m[3][0] = 0.0f; World.m[3][1] = sinf(Scale); World.m[3][2] = 0.0f; World.m[3][3] = 1.0f;
+
+    // Load the matrix into the shader
+    glUniformMatrix4fv(gWorldLocation, 1, GL_TRUE, &World.m[0][0]);
 
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -83,7 +94,6 @@ int main(int argc, char** argv)
     SetupShaders();
 
     gScaleLocation = glGetUniformLocation(shaderProgram, "gScale");
-    assert(gScaleLocation != 0xFFFFFFFF);
 
     glutMainLoop();
 
