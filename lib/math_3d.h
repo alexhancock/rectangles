@@ -19,7 +19,6 @@
 #ifndef MATH_3D_H
 #define	MATH_3D_H
 
-
 struct Vector3f
 {
   float x;
@@ -35,6 +34,26 @@ struct Vector3f
     x = _x;
     y = _y;
     z = _z;
+  }
+};
+
+struct Vector4f
+{
+  float x;
+  float y;
+  float z;
+  float w;
+
+  Vector4f()
+  {
+  }
+
+  Vector4f(float _x, float _y, float _z, float _w)
+  {
+    x = _x;
+    y = _y;
+    z = _z;
+    w = _w;
   }
 };
 

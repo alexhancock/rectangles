@@ -28,6 +28,42 @@ GLuint Shaders::compile (const char *vert, const char *frag) {
     glCompileShader(shader_vp);
     glCompileShader(shader_fp);
 
+    int infologLength = 0;
+    int charsWritten  = 0;
+
+    glGetShaderiv(shader_vp, GL_INFO_LOG_LENGTH, &infologLength);
+
+    if (infologLength > 0)
+    {
+        GLchar* infoLog = (GLchar *)malloc(infologLength);
+        if (infoLog == NULL)
+        {
+            printf( "ERROR: Could not allocate InfoLog buffer");
+            exit(1);
+        }
+        glGetShaderInfoLog(shader_vp, infologLength, &charsWritten, infoLog);
+        printf( "Shader InfoLog:\n%s", infoLog );
+        free(infoLog);
+    }
+
+    int vinfologLength = 0;
+    int vcharsWritten  = 0;
+
+    glGetShaderiv(shader_fp, GL_INFO_LOG_LENGTH, &vinfologLength);
+
+    if (infologLength > 0)
+    {
+        GLchar* infoLog = (GLchar *)malloc(vinfologLength);
+        if (infoLog == NULL)
+        {
+            printf( "ERROR: Could not allocate InfoLog buffer");
+            exit(1);
+        }
+        glGetShaderInfoLog(shader_fp, vinfologLength, &vcharsWritten, infoLog);
+        printf( "Shader InfoLog:\n%s", infoLog );
+        free(infoLog);
+    }
+
     GLuint shader_id = glCreateProgram();
     glAttachShader(shader_id, shader_vp);
     glAttachShader(shader_id, shader_fp);
@@ -36,3 +72,5 @@ GLuint Shaders::compile (const char *vert, const char *frag) {
 
     return shader_id;
 }
+
+
