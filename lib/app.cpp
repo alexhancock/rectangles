@@ -10,7 +10,9 @@
 #include <GLUT/glut.h>
 #include "math_3d.h"
 
-GLuint VBO;
+GLuint VertexBuffer;
+GLuint IndexBuffer;
+
 GLuint shaderProgram;
 GLuint gScaleLocation;
 GLuint gWorldLocation;
@@ -27,26 +29,24 @@ static void SetupShaders()
 static void RenderScene()
 {
     glClear(GL_COLOR_BUFFER_BIT);
-
     static float Scale = 0.0f;
-    Scale += 0.004f;
-    glUniform1f(gScaleLocation, sinf(Scale));
-
-    // Create a 4x4 matrix to perform a translation transformation
+    Scale += 0.01f;
+    
     Matrix4f World;
-    World.m[0][0]=sinf(Scale); World.m[0][1]=0.0f;        World.m[0][2]=0.0f;        World.m[0][3]=0.0f;
-    World.m[1][0]=0.0f;        World.m[1][1]=sinf(Scale); World.m[1][2]=0.0f;        World.m[1][3]=0.0f;
-    World.m[2][0]=0.0f;        World.m[2][1]=0.0f;        World.m[2][2]=sinf(Scale); World.m[2][3]=0.0f;
-    World.m[3][0]=0.0f;        World.m[3][1]=0.0f;        World.m[3][2]=0.0f;        World.m[3][3]=1.0f;
+    World.m[0][0] = cosf(Scale); World.m[0][1] = 0.0f; World.m[0][2] = -sinf(Scale); World.m[0][3] = 0.0f;
+    World.m[1][0] = 0.0;         World.m[1][1] = 1.0f; World.m[1][2] = 0.0f        ; World.m[1][3] = 0.0f;
+    World.m[2][0] = sinf(Scale); World.m[2][1] = 0.0f; World.m[2][2] = cosf(Scale) ; World.m[2][3] = 0.0f;
+    World.m[3][0] = 0.0f;        World.m[3][1] = 0.0f; World.m[3][2] = 0.0f        ; World.m[3][3] = 1.0f;
 
-    // Load the matrix into the shader
     glUniformMatrix4fv(gWorldLocation, 1, GL_TRUE, &World.m[0][0]);
 
     glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VertexBuffer);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer);
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+
     glDisableVertexAttribArray(0);
     glutSwapBuffers();
 }
@@ -60,15 +60,26 @@ static void InitializeGlutCallbacks()
 static void CreateVertexBuffer()
 {
     Vector3f Vertices[] = {
-      Vector3f(-0.5f, -0.5f, 0.0f),
-      Vector3f(0.0f, 0.5f, 0.0f),
-      Vector3f(0.5f, -0.5f, 0.0f),
-      // Vector3f(-0.5f, 0.5f, 0.0f)
+      Vector3f(-1.0f, -1.0f, 0.0f),
+      Vector3f(0.0f, -1.0f, 1.0f),
+      Vector3f(1.0f, -1.0f, 0.0f),
+      Vector3f(0.0f, 0.5f, 0.0f)
     };
 
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glGenBuffers(1, &VertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, VertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+    
+    unsigned int Indices[] = {
+      0, 3, 1,
+      1, 3, 2,
+      2, 3, 0,
+      0, 1, 2
+    };
+
+    glGenBuffers(1, &IndexBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
 }
 
 int main(int argc, char** argv)
