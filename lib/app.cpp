@@ -11,6 +11,9 @@
 #include <GLUT/glut.h>
 #include "math_3d.h"
 
+#define WINDOW_WIDTH 1920
+#define WINDOW_HEIGHT 1080
+
 GLuint VertexBuffer;
 GLuint IndexBuffer;
 
@@ -30,13 +33,14 @@ static void SetupShaders()
 static void RenderScene()
 {
     glClear(GL_COLOR_BUFFER_BIT);
+
     static float Scale = 0.0f;
-    Scale += 0.002f;
-   
+    Scale += 0.1f;
+
     Pipeline p;
-    p.Scale(sinf(Scale * 0.1f), sinf(Scale * 0.1f), sinf(Scale * 0.1f));
-    p.WorldPos(sinf(Scale) * 0.5f, 0.0f, 0.0f);
-    p.Rotate(sinf(Scale) * 90.0f, sinf(Scale) * 90.0f, sinf(Scale) * 90.0f);
+    p.Rotate(0.0f, Scale, 0.0f);
+    p.WorldPos(0.0f, 0.0f, 5.0f);
+    p.SetPerspectiveProj(30.0f, WINDOW_WIDTH, WINDOW_HEIGHT, 1.0f, 100.0f);
 
     glUniformMatrix4fv(gWorldLocation, 1, GL_TRUE, (const GLfloat *)p.GetTrans());
 
@@ -60,10 +64,10 @@ static void InitializeGlutCallbacks()
 static void CreateVertexBuffer()
 {
     Vector3f Vertices[] = {
-      Vector3f(-1.0f, -1.0f, 0.0f),
-      Vector3f(0.0f, -1.0f, 1.0f),
-      Vector3f(1.0f, -1.0f, 0.0f),
-      Vector3f(0.0f, 0.5f, 0.0f)
+      Vector3f(-1.0f, -1.0f, 0.5773f),
+      Vector3f(0.0f, -1.0f, -1.15475f),
+      Vector3f(1.0f, -1.0f, 0.5773f),
+      Vector3f(0.0f, 1.0f, 0.0f)
     };
 
     glGenBuffers(1, &VertexBuffer);
@@ -87,7 +91,7 @@ int main(int argc, char** argv)
     // TODO - Abstract drawing logic into a class
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
-    glutInitWindowSize(1920, 1080);
+    glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     glutInitWindowPosition(0, 0);
     glutCreateWindow("Rectangles");
 
